@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Apex College – Event Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    /* ── CSS Variables ─────────────────────────────────── */
+    :root {
+      --navy:   #0b1f3a;
+      --teal:   #00c9a7;
+      --gold:   #f5a623;
+      --cream:  #f8f5ef;
+      --white:  #ffffff;
+      --muted:  #6b7a8d;
+      --card-bg:#ffffff;
+      --shadow: 0 8px 32px rgba(11,31,58,.12);
+      --radius: 16px;
+      --ff-head: 'Playfair Display', serif;
+      --ff-body: 'DM Sans', sans-serif;
+    }
+
+    /* ── Reset ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--ff-body);
+      background: var(--cream);
+      color: var(--navy);
+      overflow-x: hidden;
+    }
+    a { text-decoration: none; color: inherit; }
+    ul { list-style: none; }
+    img { display: block; width: 100%; }
+
+    /* ── Utility ────────────────────────────────────────── */
+    .container { max-width: 1160px; margin: auto; padding: 0 24px; }
+    .section-label {
+      display: inline-block;
+      font-size: .75rem;
+      font-weight: 600;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 10px;
+    }
+    .section-title {
+      font-family: var(--ff-head);
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.15;
+      color: var(--navy);
+    }
+    .section-title span { color: var(--teal); }
+
+    /* ── Animations ─────────────────────────────────────── */
+    @keyframes fadeUp   { from { opacity:0; transform:translateY(28px); } to { opacity:1; transform:none; } }
+    @keyframes fadeIn   { from { opacity:0; } to { opacity:1; } }
+    @keyframes float    { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-14px); } }
+    @keyframes shimmer  { 0%,100%{background-position:0 50%} 50%{background-position:100% 50%} }
+    @keyframes pulse    { 0%,100%{box-shadow:0 0 0 0 rgba(0,201,167,.4)} 70%{box-shadow:0 0 0 12px transparent} }
+    @keyframes marquee  { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+    @keyframes badgePop { 0%{transform:scale(0) rotate(-12deg)} 80%{transform:scale(1.1) rotate(3deg)} 100%{transform:scale(1) rotate(0)} }
+
+    /* ── NAV ────────────────────────────────────────────── */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+      background: rgba(11,31,58,.92);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      animation: fadeIn .6s ease both;
+    }
+    .nav__inner {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 68px;
+    }
+    .nav__brand {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .nav__logo {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--teal), #0097ff);
+      display: grid; place-items: center;
+      font-family: var(--ff-head); font-size: 1.1rem; color: #fff; font-weight: 900;
+    }
+    .nav__name {
+      font-family: var(--ff-head); font-size: 1.15rem; color: var(--white);
+      letter-spacing: .02em; line-height: 1.1;
+    }
+    .nav__name span { display: block; font-size: .65rem; font-family: var(--ff-body); color: var(--teal); font-weight: 500; letter-spacing: .12em; text-transform:uppercase; }
+    .nav__menu {
+      display: flex; gap: 36px; align-items: center;
+    }
+    .nav__menu a {
+      color: rgba(255,255,255,.75); font-size: .9rem; font-weight: 500;
+      position: relative; padding-bottom: 4px; transition: color .25s;
+    }
+    .nav__menu a::after {
+      content:''; position:absolute; bottom:0; left:0; width:0; height:2px;
+      background: var(--teal); border-radius: 2px; transition: width .3s;
+    }
+    .nav__menu a:hover { color: var(--white); }
+    .nav__menu a:hover::after { width: 100%; }
+    .nav__cta {
+      background: var(--teal); color: var(--navy) !important;
+      padding: 8px 20px; border-radius: 100px; font-weight: 600 !important;
+      transition: background .25s, transform .2s !important;
+    }
+    .nav__cta::after { display: none !important; }
+    .nav__cta:hover { background: #00e0bb; transform: translateY(-1px); }
+
+    /* hamburger */
+    .nav__burger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; }
+    .nav__burger span { width: 24px; height: 2px; background: var(--white); border-radius: 2px; transition: .3s; }
+    .nav__mobile { display: none; }
+
+    /* ── HERO ───────────────────────────────────────────── */
+    .hero {
+      min-height: 100svh;
+      background: var(--navy);
+      position: relative;
+      overflow: hidden;
+      display: flex; align-items: center;
+      padding-top: 68px;
+    }
+    /* animated mesh background */
+    .hero::before {
+      content:'';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 70% at 80% 50%, rgba(0,201,167,.18) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 60% at 20% 30%, rgba(0,151,255,.15) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 50% at 50% 90%, rgba(245,166,35,.08) 0%, transparent 60%);
+    }
+    /* grid lines */
+    .hero::after {
+      content:'';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    .hero__inner {
+      position: relative; z-index: 1;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 60px; align-items: center;
+      padding: 80px 0;
+    }
+    .hero__tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(0,201,167,.12); border: 1px solid rgba(0,201,167,.3);
+      color: var(--teal); padding: 6px 14px; border-radius: 100px;
+      font-size: .78rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+      margin-bottom: 22px;
+      animation: fadeUp .7s .2s ease both;
+    }
+    .hero__tag::before { content:'●'; font-size: .5rem; animation: pulse 2s infinite; }
+    .hero__title {
+      font-family: var(--ff-head);
+      font-size: clamp(2.6rem, 5.5vw, 4.2rem);
+      line-height: 1.1; color: var(--white);
+      margin-bottom: 20px;
+      animation: fadeUp .7s .35s ease both;
+    }
+    .hero__title .accent { color: var(--teal); }
+    .hero__title .gold   { color: var(--gold); }
+    .hero__sub {
+      color: rgba(255,255,255,.6); font-size: 1.05rem; line-height: 1.7;
+      max-width: 440px; margin-bottom: 36px;
+      animation: fadeUp .7s .5s ease both;
+    }
+    .hero__actions {
+      display: flex; gap: 14px; flex-wrap: wrap;
+      animation: fadeUp .7s .65s ease both;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 28px; border-radius: 100px; font-weight: 600; font-size: .95rem;
+      cursor: pointer; transition: all .25s; border: none; font-family: var(--ff-body);
+    }
+    .btn--primary { background: var(--teal); color: var(--navy); }
+    .btn--primary:hover { background: #00e0bb; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,201,167,.35); }
+    .btn--outline { background: transparent; color: var(--white); border: 1.5px solid rgba(255,255,255,.25); }
+    .btn--outline:hover { border-color: rgba(255,255,255,.7); transform: translateY(-2px); }
+
+    /* hero visual */
+    .hero__visual {
+      position: relative;
+      animation: fadeIn 1s .4s ease both;
+    }
+    .hero__card-float {
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.12);
+      backdrop-filter: blur(16px);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      animation: float 5s ease-in-out infinite;
+    }
+    .hero__card-float h3 {
+      font-family: var(--ff-head); color: var(--white); font-size: 1.4rem; margin-bottom: 18px;
+    }
+    .hero__stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .hero__stat {
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 12px; padding: 16px;
+    }
+    .hero__stat .num {
+      font-family: var(--ff-head); font-size: 2rem; color: var(--teal); font-weight: 900;
+    }
+    .hero__stat .lbl { font-size: .75rem; color: rgba(255,255,255,.5); font-weight: 500; margin-top: 2px; }
+    .hero__badge {
+      position: absolute; top: -18px; right: -18px;
+      width: 80px; height: 80px; border-radius: 50%;
+      background: var(--gold); display: grid; place-items: center;
+      text-align: center; font-size: .62rem; font-weight: 700; color: var(--navy);
+      line-height: 1.2; animation: badgePop .6s .8s cubic-bezier(.34,1.56,.64,1) both;
+      box-shadow: 0 6px 24px rgba(245,166,35,.4);
+    }
+
+    /* ── MARQUEE STRIP ─────────────────────────────────── */
+    .marquee-strip {
+      background: var(--teal); overflow: hidden; padding: 12px 0;
+    }
+    .marquee-track {
+      display: flex; gap: 0;
+      animation: marquee 25s linear infinite;
+      white-space: nowrap;
+    }
+    .marquee-track span {
+      display: inline-flex; align-items: center; gap: 14px;
+      font-size: .78rem; font-weight: 700; color: var(--navy);
+      letter-spacing: .08em; text-transform: uppercase;
+      padding: 0 32px;
+    }
+    .marquee-track span::before { content: '✦'; opacity: .6; }
+
+    /* ── EVENTS SECTION ────────────────────────────────── */
+    .events { padding: 100px 0; }
+    .events__header { text-align: center; margin-bottom: 60px; }
+    .events__grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 28px;
+    }
+    .event-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: transform .3s, box-shadow .3s;
+      animation: fadeUp .6s ease both;
+      border: 1px solid rgba(11,31,58,.06);
+    }
+    .event-card:hover { transform: translateY(-6px); box-shadow: 0 20px 52px rgba(11,31,58,.16); }
+    .event-card__banner {
+      height: 140px; position: relative;
+      display: flex; align-items: flex-end; padding: 16px 20px;
+    }
+    .event-card__banner::after {
+      content:''; position:absolute; inset:0;
+      background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,.55));
+    }
+    .event-card__cat {
+      position: relative; z-index: 1;
+      background: var(--gold); color: var(--navy);
+      font-size: .68rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      padding: 4px 10px; border-radius: 100px;
+    }
+    /* Category colors */
+    .event-card--tech   .event-card__banner { background: linear-gradient(135deg,#0b1f3a 0%,#00c9a7 100%); }
+    .event-card--arts   .event-card__banner { background: linear-gradient(135deg,#6a0572 0%,#f5a623 100%); }
+    .event-card--sports .event-card__banner { background: linear-gradient(135deg,#1a237e 0%,#0097ff 100%); }
+    .event-card--cult   .event-card__banner { background: linear-gradient(135deg,#b71c1c 0%,#f48fb1 100%); }
+    .event-card--quiz   .event-card__banner { background: linear-gradient(135deg,#1b5e20 0%,#69f0ae 100%); }
+    .event-card--lit    .event-card__banner { background: linear-gradient(135deg,#3e2723 0%,#bcaaa4 100%); }
+    .event-card__body { padding: 22px 24px; }
+    .event-card__title {
+      font-family: var(--ff-head); font-size: 1.2rem; margin-bottom: 14px; color: var(--navy);
+    }
+    .event-card__meta { display: flex; flex-direction: column; gap: 8px; }
+    .event-card__meta-row {
+      display: flex; align-items: center; gap: 10px;
+      font-size: .84rem; color: var(--muted);
+    }
+    .event-card__icon {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: rgba(0,201,167,.1); display: grid; place-items: center;
+      font-size: .85rem; flex-shrink: 0;
+    }
+    .event-card__foot {
+      padding: 14px 24px 20px;
+      border-top: 1px solid rgba(11,31,58,.06);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .event-card__reg {
+      font-size: .78rem; color: var(--teal); font-weight: 600;
+    }
+    .event-card__btn {
+      background: var(--navy); color: var(--white);
+      padding: 8px 18px; border-radius: 100px; font-size: .8rem; font-weight: 600;
+      transition: background .25s, transform .2s;
+    }
+    .event-card__btn:hover { background: var(--teal); color: var(--navy); transform: translateY(-1px); }
+
+    /* ── WINNERS ────────────────────────────────────────── */
+    .winners { padding: 100px 0; background: var(--navy); position: relative; overflow: hidden; }
+    .winners::before {
+      content:'';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 50% 60% at 10% 50%, rgba(0,201,167,.1) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 50% at 90% 30%, rgba(245,166,35,.08) 0%, transparent 60%);
+    }
+    .winners__header { text-align: center; margin-bottom: 60px; position: relative; z-index: 1; }
+    .winners__header .section-title { color: var(--white); }
+    .winners__grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 24px; position: relative; z-index: 1;
+    }
+    .winner-card {
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: var(--radius);
+      padding: 32px 24px; text-align: center;
+      transition: transform .3s, background .3s;
+      position: relative; overflow: hidden;
+    }
+    .winner-card::before {
+      content:'';
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--teal), var(--gold));
+    }
+    .winner-card:hover { transform: translateY(-6px); background: rgba(255,255,255,.09); }
+    .winner-card__medal {
+      width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 18px;
+      display: grid; place-items: center; font-size: 1.8rem;
+    }
+    .winner-card__medal--gold   { background: linear-gradient(135deg,#f5a623,#ffd700); box-shadow: 0 6px 20px rgba(245,166,35,.4); }
+    .winner-card__medal--silver { background: linear-gradient(135deg,#b0bec5,#eceff1); box-shadow: 0 6px 20px rgba(176,190,197,.3); }
+    .winner-card__medal--bronze { background: linear-gradient(135deg,#cd7f32,#e8a87c); box-shadow: 0 6px 20px rgba(205,127,50,.35); }
+    .winner-card__medal--special{ background: linear-gradient(135deg,#00c9a7,#0097ff); box-shadow: 0 6px 20px rgba(0,201,167,.4); }
+    .winner-card__name { font-family: var(--ff-head); color: var(--white); font-size: 1.15rem; margin-bottom: 6px; }
+    .winner-card__event { color: var(--teal); font-size: .82rem; font-weight: 600; margin-bottom: 10px; }
+    .winner-card__dept { color: rgba(255,255,255,.45); font-size: .78rem; margin-bottom: 14px; }
+    .winner-card__prize {
+      display: inline-block;
+      background: rgba(245,166,35,.15); border: 1px solid rgba(245,166,35,.3);
+      color: var(--gold); padding: 5px 14px; border-radius: 100px; font-size: .75rem; font-weight: 700;
+    }
+
+    /* ── CONTACT ────────────────────────────────────────── */
+    .contact { padding: 100px 0; }
+    .contact__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start; }
+    .contact__info-title { font-family: var(--ff-head); font-size: 1rem; color: var(--navy); margin-bottom: 18px; opacity: .5; }
+    .contact__name { font-family: var(--ff-head); font-size: 2.2rem; color: var(--navy); margin-bottom: 6px; }
+    .contact__role { color: var(--teal); font-weight: 600; font-size: .9rem; margin-bottom: 28px; letter-spacing: .05em; text-transform: uppercase; }
+    .contact__details { display: flex; flex-direction: column; gap: 16px; margin-bottom: 36px; }
+    .contact__detail-row {
+      display: flex; align-items: center; gap: 14px;
+    }
+    .contact__detail-icon {
+      width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0;
+      display: grid; place-items: center; font-size: 1rem;
+    }
+    .contact__detail-icon--teal  { background: rgba(0,201,167,.12); }
+    .contact__detail-icon--gold  { background: rgba(245,166,35,.12); }
+    .contact__detail-icon--blue  { background: rgba(0,151,255,.12); }
+    .contact__detail-text { font-size: .9rem; color: var(--navy); line-height: 1.4; }
+    .contact__detail-text strong { display: block; font-weight: 600; font-size: .78rem; color: var(--muted); margin-bottom: 2px; text-transform: uppercase; letter-spacing: .06em; }
+
+    /* Map placeholder */
+    .contact__map {
+      border-radius: var(--radius); overflow: hidden;
+      box-shadow: var(--shadow); height: 380px;
+      background: linear-gradient(135deg, #e8f5e9, #e3f2fd);
+      position: relative; display: flex; align-items: center; justify-content: center;
+    }
+    .contact__map-inner { text-align: center; }
+    .contact__map-pin { font-size: 3rem; display: block; animation: float 3s ease-in-out infinite; }
+    .contact__map-label { font-family: var(--ff-head); font-size: 1.1rem; color: var(--navy); margin-top: 10px; }
+    .contact__map-sub { font-size: .82rem; color: var(--muted); margin-top: 4px; }
+    /* decorative grid on map */
+    .contact__map::before {
+      content:''; position:absolute; inset:0;
+      background-image:
+        linear-gradient(rgba(11,31,58,.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(11,31,58,.05) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    /* Social links */
+    .contact__socials { display: flex; gap: 12px; }
+    .social-btn {
+      width: 42px; height: 42px; border-radius: 12px;
+      border: 1.5px solid rgba(11,31,58,.12);
+      display: grid; place-items: center; font-size: .95rem;
+      transition: all .25s; color: var(--navy);
+    }
+    .social-btn:hover { background: var(--teal); border-color: var(--teal); color: var(--white); transform: translateY(-2px); }
+
+    /* ── FOOTER ─────────────────────────────────────────── */
+    .footer { background: var(--navy); padding: 40px 0; }
+    .footer__inner {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px;
+    }
+    .footer__brand { font-family: var(--ff-head); color: var(--white); font-size: 1rem; }
+    .footer__copy { color: rgba(255,255,255,.35); font-size: .8rem; }
+    .footer__links { display: flex; gap: 24px; }
+    .footer__links a { color: rgba(255,255,255,.45); font-size: .82rem; transition: color .25s; }
+    .footer__links a:hover { color: var(--teal); }
+
+    /* ── RESPONSIVE ─────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .nav__menu { display: none; }
+      .nav__burger { display: flex; }
+      .nav__mobile {
+        display: flex; flex-direction: column; gap: 0;
+        background: rgba(11,31,58,.98);
+        position: fixed; top: 68px; left: 0; right: 0;
+        padding: 16px 0; transform: translateY(-110%);
+        transition: transform .35s; border-bottom: 1px solid rgba(255,255,255,.07);
+      }
+      .nav__mobile.open { transform: translateY(0); }
+      .nav__mobile a { display: block; padding: 14px 28px; color: rgba(255,255,255,.7); font-size: .95rem; transition: color .2s; }
+      .nav__mobile a:hover { color: var(--teal); }
+
+      .hero__inner { grid-template-columns: 1fr; gap: 40px; padding: 60px 0; }
+      .hero__visual { order: -1; }
+      .hero__stat-grid { grid-template-columns: 1fr 1fr; }
+      .hero__badge { width: 60px; height: 60px; top: -12px; right: -12px; font-size: .55rem; }
+
+      .contact__grid { grid-template-columns: 1fr; }
+      .footer__inner { flex-direction: column; text-align: center; }
+    }
+
+    @media (max-width: 480px) {
+      .events__grid { grid-template-columns: 1fr; }
+      .winners__grid { grid-template-columns: 1fr; }
+      .hero__actions { flex-direction: column; }
+      .btn { justify-content: center; }
+    }
+
+    /* ── REGISTRATION MODAL ─────────────────────────────── */
+    @keyframes modalIn  { from { opacity:0; transform:scale(.94) translateY(20px); } to { opacity:1; transform:scale(1) translateY(0); } }
+    @keyframes overlayIn{ from { opacity:0; } to { opacity:1; } }
+
+    .reg-overlay {
+      display: none; position: fixed; inset: 0; z-index: 2000;
+      background: rgba(11,31,58,.72); backdrop-filter: blur(6px);
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .reg-overlay.open {
+      display: flex;
+      animation: overlayIn .25s ease both;
+    }
+    .reg-modal {
+      background: var(--white);
+      border-radius: 24px;
+      width: 100%; max-width: 560px;
+      max-height: 90vh; overflow-y: auto;
+      box-shadow: 0 32px 80px rgba(11,31,58,.28);
+      animation: modalIn .35s cubic-bezier(.34,1.56,.64,1) both;
+      position: relative;
+    }
+    .reg-modal__header {
+      background: var(--navy);
+      border-radius: 24px 24px 0 0;
+      padding: 32px 36px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .reg-modal__header::before {
+      content:'';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 70% 80% at 90% 50%, rgba(0,201,167,.2) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 60% at 10% 30%, rgba(0,151,255,.15) 0%, transparent 60%);
+    }
+    .reg-modal__close {
+      position: absolute; top: 16px; right: 18px; z-index: 1;
+      width: 34px; height: 34px; border-radius: 50%;
+      background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18);
+      display: grid; place-items: center; cursor: pointer;
+      color: rgba(255,255,255,.7); font-size: 1rem;
+      transition: background .2s, color .2s;
+    }
+    .reg-modal__close:hover { background: rgba(255,255,255,.2); color: var(--white); }
+    .reg-modal__event-tag {
+      position: relative; z-index: 1;
+      display: inline-flex; align-items: center; gap: 7px;
+      background: rgba(0,201,167,.15); border: 1px solid rgba(0,201,167,.3);
+      color: var(--teal); padding: 5px 12px; border-radius: 100px;
+      font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .reg-modal__title {
+      position: relative; z-index: 1;
+      font-family: var(--ff-head); font-size: 1.6rem; color: var(--white); margin-bottom: 6px;
+    }
+    .reg-modal__subtitle {
+      position: relative; z-index: 1;
+      color: rgba(255,255,255,.5); font-size: .85rem;
+    }
+
+    .reg-modal__body { padding: 32px 36px 36px; }
+    .reg-steps {
+      display: flex; gap: 0; margin-bottom: 30px;
+      border-bottom: 2px solid rgba(11,31,58,.07);
+      padding-bottom: 20px;
+    }
+    .reg-step {
+      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px;
+      position: relative;
+    }
+    .reg-step:not(:last-child)::after {
+      content: '';
+      position: absolute; top: 14px; left: 50%; width: 100%;
+      height: 2px; background: rgba(11,31,58,.1);
+    }
+    .reg-step.done::after, .reg-step.active::after { background: var(--teal); }
+    .reg-step__dot {
+      width: 28px; height: 28px; border-radius: 50%; z-index: 1;
+      display: grid; place-items: center; font-size: .75rem; font-weight: 700;
+      background: rgba(11,31,58,.08); color: var(--muted);
+      border: 2px solid rgba(11,31,58,.1);
+      transition: all .3s;
+    }
+    .reg-step.active .reg-step__dot { background: var(--teal); color: var(--navy); border-color: var(--teal); }
+    .reg-step.done   .reg-step__dot { background: var(--teal); color: var(--navy); border-color: var(--teal); }
+    .reg-step__label { font-size: .68rem; color: var(--muted); font-weight: 500; text-align: center; }
+    .reg-step.active .reg-step__label { color: var(--teal); font-weight: 700; }
+
+    /* Form panels */
+    .reg-panel { display: none; }
+    .reg-panel.visible { display: block; animation: fadeUp .3s ease both; }
+
+    .reg-group { margin-bottom: 20px; }
+    .reg-label {
+      display: block; font-size: .78rem; font-weight: 700;
+      color: var(--navy); margin-bottom: 7px;
+      letter-spacing: .04em; text-transform: uppercase;
+    }
+    .reg-label span { color: #e05a5a; }
+    .reg-input, .reg-select, .reg-textarea {
+      width: 100%; padding: 12px 16px;
+      border: 1.5px solid rgba(11,31,58,.14);
+      border-radius: 12px; font-family: var(--ff-body); font-size: .92rem;
+      color: var(--navy); background: var(--cream);
+      transition: border-color .25s, box-shadow .25s;
+      outline: none;
+    }
+    .reg-input:focus, .reg-select:focus, .reg-textarea:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(0,201,167,.15);
+      background: var(--white);
+    }
+    .reg-input.error { border-color: #e05a5a; box-shadow: 0 0 0 3px rgba(224,90,90,.12); }
+    .reg-textarea { resize: vertical; min-height: 90px; }
+    .reg-select { appearance: none; cursor: pointer; }
+    .reg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    /* Team toggle */
+    .reg-toggle {
+      display: flex; gap: 8px; flex-wrap: wrap;
+    }
+    .reg-toggle label {
+      display: flex; align-items: center; gap: 7px; cursor: pointer;
+      padding: 9px 16px; border-radius: 100px;
+      border: 1.5px solid rgba(11,31,58,.14);
+      font-size: .85rem; font-weight: 500; color: var(--muted);
+      transition: all .2s; user-select: none;
+    }
+    .reg-toggle input[type=radio] { display: none; }
+    .reg-toggle input[type=radio]:checked + label {
+      background: var(--teal); color: var(--navy);
+      border-color: var(--teal); font-weight: 700;
+    }
+
+    /* Members area */
+    #teamMembersArea { margin-top: 16px; }
+    .member-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;
+    }
+
+    /* Buttons */
+    .reg-actions { display: flex; gap: 12px; margin-top: 28px; }
+    .reg-btn {
+      flex: 1; padding: 13px 20px; border-radius: 100px; border: none;
+      font-family: var(--ff-body); font-size: .92rem; font-weight: 700;
+      cursor: pointer; transition: all .25s;
+    }
+    .reg-btn--primary { background: var(--teal); color: var(--navy); }
+    .reg-btn--primary:hover { background: #00e0bb; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,201,167,.3); }
+    .reg-btn--outline {
+      background: transparent; color: var(--navy);
+      border: 1.5px solid rgba(11,31,58,.18);
+    }
+    .reg-btn--outline:hover { border-color: var(--navy); background: rgba(11,31,58,.04); }
+
+    /* Success state */
+    .reg-success {
+      text-align: center; padding: 10px 0 20px;
+    }
+    .reg-success__icon {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--teal), #0097ff);
+      display: grid; place-items: center; font-size: 2rem;
+      margin: 0 auto 20px; box-shadow: 0 10px 30px rgba(0,201,167,.35);
+      animation: badgePop .6s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    .reg-success__title {
+      font-family: var(--ff-head); font-size: 1.8rem; color: var(--navy); margin-bottom: 10px;
+    }
+    .reg-success__sub { color: var(--muted); font-size: .92rem; line-height: 1.6; margin-bottom: 24px; }
+    .reg-success__ref {
+      display: inline-block;
+      background: rgba(0,201,167,.1); border: 1px solid rgba(0,201,167,.25);
+      color: var(--teal); padding: 8px 20px; border-radius: 100px;
+      font-size: .82rem; font-weight: 700; letter-spacing: .08em; margin-bottom: 28px;
+    }
+
+    /* Error text */
+    .field-error {
+      font-size: .75rem; color: #e05a5a; margin-top: 5px; display: none; font-weight: 600;
+    }
+    .field-error.show { display: block; }
+
+    @media (max-width: 600px) {
+      .reg-modal__header { padding: 24px 22px 20px; }
+      .reg-modal__body { padding: 24px 22px 28px; }
+      .reg-row { grid-template-columns: 1fr; }
+      .member-row { grid-template-columns: 1fr; }
+    }
+
+    /* staggered card animations */
+    .event-card:nth-child(1)  { animation-delay: .05s; }
+    .event-card:nth-child(2)  { animation-delay: .12s; }
+    .event-card:nth-child(3)  { animation-delay: .19s; }
+    .event-card:nth-child(4)  { animation-delay: .26s; }
+    .event-card:nth-child(5)  { animation-delay: .33s; }
+    .event-card:nth-child(6)  { animation-delay: .40s; }
+    .winner-card:nth-child(1) { animation-delay: .05s; }
+    .winner-card:nth-child(2) { animation-delay: .12s; }
+    .winner-card:nth-child(3) { animation-delay: .19s; }
+    .winner-card:nth-child(4) { animation-delay: .26s; }
+    .winner-card:nth-child(5) { animation-delay: .33s; }
+    .winner-card:nth-child(6) { animation-delay: .40s; }
+  </style>
+</head>
+<body>
+
+  <!-- ── NAV ─────────────────────────────────────────────── -->
+  <nav class="nav">
+    <div class="container nav__inner">
+      <a href="#home" class="nav__brand">
+        <div class="nav__logo">A</div>
+        <div class="nav__name">
+          Apex College
+          <span>of Engineering &amp; Technology</span>
+        </div>
+      </a>
+      <ul class="nav__menu">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#events">Events</a></li>
+        <li><a href="#winners">Winners</a></li>
+        <li><a href="#contact">Contact</a></li>
+        <li><a href="#events" class="nav__cta">Register Now</a></li>
+      </ul>
+      <div class="nav__burger" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+    <div class="nav__mobile" id="mobileMenu">
+      <a href="#home"    onclick="closeMenu()">Home</a>
+      <a href="#events"  onclick="closeMenu()">Events</a>
+      <a href="#winners" onclick="closeMenu()">Winners</a>
+      <a href="#contact" onclick="closeMenu()">Contact</a>
+      <a href="#events"  onclick="closeMenu()" style="color:var(--teal);font-weight:600;">Register Now →</a>
+    </div>
+  </nav>
+
+  <!-- ── HERO ─────────────────────────────────────────────── -->
+  <section class="hero" id="home">
+    <div class="container">
+      <div class="hero__inner">
+        <div class="hero__text">
+          <div class="hero__tag">🎓 Annual Fest 2025 · Upcoming</div>
+          <h1 class="hero__title">
+            Where <span class="accent">Talent</span><br>
+            Meets <span class="gold">Triumph</span>
+          </h1>
+          <p class="hero__sub">
+            Apex College's grand annual fest unites students across disciplines for competitions, culture, innovation, and unforgettable memories. Join thousands of participants this April.
+          </p>
+          <div class="hero__actions">
+            <a href="#events" class="btn btn--primary">Explore Events ↓</a>
+            <a href="#winners" class="btn btn--outline">View Winners</a>
+          </div>
+        </div>
+        <div class="hero__visual">
+          <div class="hero__card-float">
+            <div class="hero__badge">FEST<br>2025</div>
+            <h3>Apex Fest 2025</h3>
+            <div class="hero__stat-grid">
+              <div class="hero__stat">
+                <div class="num">42+</div>
+                <div class="lbl">Events</div>
+              </div>
+              <div class="hero__stat">
+                <div class="num">3K+</div>
+                <div class="lbl">Participants</div>
+              </div>
+              <div class="hero__stat">
+                <div class="num">₹5L</div>
+                <div class="lbl">Prize Pool</div>
+              </div>
+              <div class="hero__stat">
+                <div class="num">18</div>
+                <div class="lbl">Colleges</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── MARQUEE ───────────────────────────────────────────── -->
+  <div class="marquee-strip">
+    <div class="marquee-track">
+      <span>Hackathon 2025</span>
+      <span>Dance Fiesta</span>
+      <span>Tech Quiz</span>
+      <span>Art Exhibition</span>
+      <span>Cricket Championship</span>
+      <span>Photography Contest</span>
+      <span>Debate League</span>
+      <span>Robo Wars</span>
+      <span>Music Night</span>
+      <span>Hackathon 2025</span>
+      <span>Dance Fiesta</span>
+      <span>Tech Quiz</span>
+      <span>Art Exhibition</span>
+      <span>Cricket Championship</span>
+      <span>Photography Contest</span>
+      <span>Debate League</span>
+      <span>Robo Wars</span>
+      <span>Music Night</span>
+    </div>
+  </div>
+
+  <!-- ── EVENTS ────────────────────────────────────────────── -->
+  <section class="events" id="events">
+    <div class="container">
+      <div class="events__header">
+        <span class="section-label">📅 What's On</span>
+        <h2 class="section-title">Upcoming <span>Events</span></h2>
+        <p style="color:var(--muted);margin-top:12px;font-size:.95rem;">Six days. Forty-two events. Infinite memories.</p>
+      </div>
+      <div class="events__grid">
+
+        <!-- Card 1 -->
+        <div class="event-card event-card--tech">
+          <div class="event-card__banner">
+            <span class="event-card__cat">Technology</span>
+          </div>
+          <div class="event-card__body">
+            <h3 class="event-card__title">Code Clash Hackathon</h3>
+            <div class="event-card__meta">
+              <div class="event-card__meta-row">
+                <div class="event-card__icon">📅</div>
+                <span>April 12, 2025 – April 13, 2025</span>
+              </div>
+              <div class="event-card__meta-row">
+                <div class="event-card__icon">⏰</div>
+                <span>9:00 AM – 9:00 AM (24 hrs)</span>
+              </div>
+              <div class="event-card__meta-row">
+                <div class="event-card__icon">📍</div>
+                <span>Innovation Lab, Block C</span>
+              </div>
+            </div>
+          </div>
+          <div class="event-card__foot">
+            <span class="event-card__reg">Open · Teams of 3</span>
+            <a href="#" class="event-card__btn">Register</a>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="event-card event-card--arts">
+          <div class="event-card__banner">
+            <span class="event-card__cat">Performing Arts</span>
+          </div>
+          <div class="event-card__body">
+            <h3 class="event-card__title">Beats & Moves – Dance Fiesta</h3>
+            <div class="event-card__meta">
+              <div class="event-card__meta-row">
+                <div class="event-card__icon">📅</div>
+                <span>April 14, 2025</span>
+              </div>
+              <div class="event-card__meta-row">
+                <div class="event-card__icon">⏰</div>
+                <span>5:00 PM – 9:00 PM</span>
+              </div>
+              <div class="event-card__meta-row">
+                <div class="event-card__icon">📍</div>
+                <span>Main Auditorium</span>
+              </div>
+            </div>
+          </div>
+          <div class="event-card__foot">
+            <span class="event-card__reg">Solo &amp; Group</span>
+            <a href="#" class="event-card__btn">Register</a>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="event-card event-card--sports">
+          <div class="event-card__banner">
+            <span class="event-card__cat">Sports</span>
+          </div>
+          <div class="event-card__body">
+            <h3 class="event-card__title">Cricket Premier League</h3>
+            <div class="event-card__meta">
+              <div class="event-card__meta-row">
+                <div class="event-card__icon">📅</div>
+                <span>April 15–16, 2025</span>
+              </div>
+              <div class="event-card__meta-row">
+                <div class="event-card__icon">⏰</div>
+                <span>8:00 AM – 6:00 PM</span>
+              </div>
+              <div class="event-card__meta-row">
+                <div class="event-card__icon">📍</div>
+                <span>College Ground, East Wing</span>
+              </div>
+            </div>
+          </div>
+          <div class="event-card__foot">
+            <span class="event-card__reg">Inter-dept Teams</span>
+            <a href="#" class="event-card__btn">Register</a>
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="event-card event-card--cult">
+          <div class="event-card__banner">
+            <span class="event-card__cat">Cultural</span>
+          </div>
+          <div class="event-card__body">
+            <h3 class="event-card__title">Rangmanch – Street Play</h3>
+            <div class="event-card__meta">
+              <div class="event-card__meta-row">
+                <div class="event-card__icon">📅</div>
+                <span>April 17, 2025</span>
+              </div>
+              <div class="event-card__meta-row">
+                <div class="event-card__icon">⏰</div>
+                <span>2:00 PM – 6:00 PM</span>
+              </div>
+              <div class="event-card__meta-row">
+                <div class="event-card__icon">📍</div>
+                <span>Open-Air Theatre</span>
+              </div>
+            </div>
+          </div>
+          <div class="event-card__foot">
+            <span class="event-card__reg">Groups of 6–10</span>
+            <a href="#" class="event-card__btn">Register</a>
+          </div>
+        </div>
+
+        <!-- Card 5 -->
+        <div class="event-card event-card--quiz">
+          <div class="event-card__banner">
+            <span class="event-card__cat">Academic</span>
+          </div>
+          <div class="event-card__body">
+            <h3 class="event-card__title">Tech Brain Quiz</h3>
+            <div class="event-card__meta">
+              <div class="event-card__meta-row">
+                <div class="event-card__icon">📅</div>
+                <span>April 13, 2025</span>
+              </div>
+              <div class="event-card__meta-row">
+                <div class="event-card__icon">⏰</div>
+                <span>10:00 AM – 1:00 PM</span>
+              </div>
+              <div class="event-card__meta-row">
+                <div class="event-card__icon">📍</div>
+                <span>Seminar Hall – A1</span>
+              </div>
+            </div>
+          </div>
+          <div class="event-card__foot">
+            <span class="event-card__reg">Pairs &amp; Solo</span>
+            <a href="#" class="event-card__btn">Register</a>
+          </div>
+        </div>
+
+        <!-- Card 6 -->
+        <div class="event-card event-card--lit">
+          <div class="event-card__banner">
+            <span class="event-card__cat">Literary</span>
+          </div>
+          <div class="event-card__body">
+            <h3 class="event-card__title">Vox Veritas – Debate</h3>
+            <div class="event-card__meta">
+              <div class="event-card__meta-row">
+                <div class="event-card__icon">📅</div>
+                <span>April 15, 2025</span>
+              </div>
+              <div class="event-card__meta-row">
+                <div class="event-card__icon">⏰</div>
+                <span>11:00 AM – 4:00 PM</span>
+              </div>
+              <div class="event-card__meta-row">
+                <div class="event-card__icon">📍</div>
+                <span>Conference Room 2, Admin Block</span>
+              </div>
+            </div>
+          </div>
+          <div class="event-card__foot">
+            <span class="event-card__reg">Solo – Open House</span>
+            <a href="#" class="event-card__btn">Register</a>
+          </div>
+        </div>
+
+      </div><!-- /grid -->
+    </div>
+  </section>
+
+  <!-- ── WINNERS ───────────────────────────────────────────── -->
+  <section class="winners" id="winners">
+    <div class="container">
+      <div class="winners__header">
+        <span class="section-label" style="color:var(--gold);">🏆 Hall of Fame</span>
+        <h2 class="section-title">Our <span>Champions</span></h2>
+        <p style="color:rgba(255,255,255,.45);margin-top:12px;font-size:.95rem;">Celebrating the stars of Apex Fest 2024</p>
+      </div>
+      <div class="winners__grid">
+
+        <div class="winner-card">
+          <div class="hero__stat"></div>
+          <div class="winner-card__medal winner-card__medal--gold">🥇</div>
+          <div class="winner-card__name">Arjun Mehta</div>
+          <div class="winner-card__event">Hackathon – Best Project</div>
+          <div class="winner-card__dept">CSE · 3rd Year</div>
+          <span class="winner-card__prize">₹25,000 Cash Prize</span>
+        </div>
+
+        <div class="winner-card">
+          <div class="winner-card__medal winner-card__medal--gold">🥇</div>
+          <div class="winner-card__name">Priya Sharma</div>
+          <div class="winner-card__event">Dance Fiesta – Solo</div>
+          <div class="winner-card__dept">ECE · 2nd Year</div>
+          <span class="winner-card__prize">₹15,000 Cash Prize</span>
+        </div>
+
+        <div class="winner-card">
+          <div class="winner-card__medal winner-card__medal--silver">🥈</div>
+          <div class="winner-card__name">Rohan Patel</div>
+          <div class="winner-card__event">Tech Quiz – Runners-Up</div>
+          <div class="winner-card__dept">IT · 4th Year</div>
+          <span class="winner-card__prize">₹10,000 Cash Prize</span>
+        </div>
+
+        <div class="winner-card">
+          <div class="winner-card__medal winner-card__medal--bronze">🥉</div>
+          <div class="winner-card__name">Sneha Kulkarni</div>
+          <div class="winner-card__event">Debate – 2nd Runner-Up</div>
+          <div class="winner-card__dept">MECH · 3rd Year</div>
+          <span class="winner-card__prize">₹7,000 Cash Prize</span>
+        </div>
+
+        <div class="winner-card">
+          <div class="winner-card__medal winner-card__medal--special">⭐</div>
+          <div class="winner-card__name">Dev Rao &amp; Team</div>
+          <div class="winner-card__event">Street Play – Best Troupe</div>
+          <div class="winner-card__dept">CIVIL · Mixed Batch</div>
+          <span class="winner-card__prize">₹12,000 Cash Prize</span>
+        </div>
+
+        <div class="winner-card">
+          <div class="winner-card__medal winner-card__medal--gold">🥇</div>
+          <div class="winner-card__name">Aisha Farouk</div>
+          <div class="winner-card__event">Photography – Best Shot</div>
+          <div class="winner-card__dept">AI&ML · 1st Year</div>
+          <span class="winner-card__prize">₹8,000 Cash Prize</span>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CONTACT ───────────────────────────────────────────── -->
+  <section class="contact" id="contact">
+    <div class="container">
+      <div style="margin-bottom:60px;">
+        <span class="section-label">📞 Get In Touch</span>
+        <h2 class="section-title">Contact <span>Coordinators</span></h2>
+      </div>
+      <div class="contact__grid">
+        <div>
+          <div class="contact__info-title">Event Coordinator</div>
+          <div class="contact__name">Dr. Meera Iyer</div>
+          <div class="contact__role">Head of Student Affairs &amp; Cultural Committee</div>
+          <div class="contact__details">
+            <div class="contact__detail-row">
+              <div class="contact__detail-icon contact__detail-icon--teal">📧</div>
+              <div class="contact__detail-text">
+                <strong>Email</strong>
+                meera.iyer@apexcollege.edu.in
+              </div>
+            </div>
+            <div class="contact__detail-row">
+              <div class="contact__detail-icon contact__detail-icon--gold">📞</div>
+              <div class="contact__detail-text">
+                <strong>Phone</strong>
+                +91 98765 43210
+              </div>
+            </div>
+            <div class="contact__detail-row">
+              <div class="contact__detail-icon contact__detail-icon--blue">🕐</div>
+              <div class="contact__detail-text">
+                <strong>Office Hours</strong>
+                Mon – Fri, 10:00 AM – 5:00 PM
+              </div>
+            </div>
+            <div class="contact__detail-row">
+              <div class="contact__detail-icon contact__detail-icon--teal">📍</div>
+              <div class="contact__detail-text">
+                <strong>Office</strong>
+                Room 204, Admin Block, Apex Campus, Pune – 411041
+              </div>
+            </div>
+          </div>
+
+          <!-- Student Coordinator -->
+          <div style="padding:22px;background:rgba(0,201,167,.06);border:1px solid rgba(0,201,167,.18);border-radius:var(--radius);margin-bottom:28px;">
+            <div style="font-size:.72rem;font-weight:700;color:var(--teal);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;">Student Coordinator</div>
+            <div style="font-family:var(--ff-head);font-size:1.2rem;color:var(--navy);margin-bottom:4px;">Kabir Singh</div>
+            <div style="font-size:.82rem;color:var(--muted);margin-bottom:10px;">CSE Final Year · Fest Chairperson</div>
+            <div style="font-size:.85rem;color:var(--navy);">📞 +91 91234 56789 &nbsp;|&nbsp; 📧 kabir.s@apexcollege.edu.in</div>
+          </div>
+
+          <div class="contact__socials">
+            <a href="#" class="social-btn" title="Instagram">📸</a>
+            <a href="#" class="social-btn" title="Twitter/X">🐦</a>
+            <a href="#" class="social-btn" title="LinkedIn">💼</a>
+            <a href="#" class="social-btn" title="YouTube">🎥</a>
+            <a href="#" class="social-btn" title="WhatsApp">💬</a>
+          </div>
+        </div>
+
+        <div>
+          <div class="contact__map">
+            <div class="contact__map-inner">
+              <span class="contact__map-pin">📍</span>
+              <div class="contact__map-label">Apex College Campus</div>
+              <div class="contact__map-sub">Baner Road, Pune – 411041, Maharashtra</div>
+            </div>
+          </div>
+          <div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+            <a href="#" style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:var(--navy);color:var(--white);border-radius:12px;font-size:.84rem;font-weight:600;transition:transform .2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+              🗺️ Open in Maps
+            </a>
+            <a href="mailto:meera.iyer@apexcollege.edu.in" style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:var(--teal);color:var(--navy);border-radius:12px;font-size:.84rem;font-weight:600;transition:transform .2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+              ✉️ Send Email
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ─────────────────────────────────────────────── -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer__brand">Apex College &mdash; Event Hub</div>
+      <div class="footer__links">
+        <a href="#home">Home</a>
+        <a href="#events">Events</a>
+        <a href="#winners">Winners</a>
+        <a href="#contact">Contact</a>
+      </div>
+      <div class="footer__copy">© 2025 Apex College of Engineering &amp; Technology. All rights reserved.</div>
+    </div>
+  </footer>
+
+  <!-- ── REGISTRATION MODAL ─────────────────────────────────── -->
+  <div class="reg-overlay" id="regOverlay" role="dialog" aria-modal="true" aria-labelledby="regModalTitle">
+    <div class="reg-modal" id="regModal">
+
+      <!-- Header -->
+      <div class="reg-modal__header">
+        <button class="reg-modal__close" onclick="closeReg()" aria-label="Close">✕</button>
+        <div class="reg-modal__event-tag" id="regEventTag">📅 Event Registration</div>
+        <div class="reg-modal__title" id="regModalTitle">Register for Event</div>
+        <div class="reg-modal__subtitle">Fill in your details to secure your spot</div>
+      </div>
+
+      <!-- Body -->
+      <div class="reg-modal__body">
+
+        <!-- Step indicators -->
+        <div class="reg-steps" id="regSteps">
+          <div class="reg-step active" id="step-ind-1">
+            <div class="reg-step__dot">1</div>
+            <div class="reg-step__label">Personal</div>
+          </div>
+          <div class="reg-step" id="step-ind-2">
+            <div class="reg-step__dot">2</div>
+            <div class="reg-step__label">Event</div>
+          </div>
+          <div class="reg-step" id="step-ind-3">
+            <div class="reg-step__dot">3</div>
+            <div class="reg-step__label">Confirm</div>
+          </div>
+        </div>
+
+        <!-- Panel 1: Personal Details -->
+        <div class="reg-panel visible" id="regPanel1">
+          <div class="reg-row">
+            <div class="reg-group">
+              <label class="reg-label" for="regFirstName">First Name <span>*</span></label>
+              <input class="reg-input" id="regFirstName" type="text" placeholder="e.g. Arjun">
+              <div class="field-error" id="err-firstName">Please enter your first name</div>
+            </div>
+            <div class="reg-group">
+              <label class="reg-label" for="regLastName">Last Name <span>*</span></label>
+              <input class="reg-input" id="regLastName" type="text" placeholder="e.g. Mehta">
+              <div class="field-error" id="err-lastName">Please enter your last name</div>
+            </div>
+          </div>
+          <div class="reg-group">
+            <label class="reg-label" for="regEmail">Email Address <span>*</span></label>
+            <input class="reg-input" id="regEmail" type="email" placeholder="your@apexcollege.edu.in">
+            <div class="field-error" id="err-email">Please enter a valid email</div>
+          </div>
+          <div class="reg-row">
+            <div class="reg-group">
+              <label class="reg-label" for="regPhone">Phone Number <span>*</span></label>
+              <input class="reg-input" id="regPhone" type="tel" placeholder="+91 98765 43210">
+              <div class="field-error" id="err-phone">Please enter a valid phone number</div>
+            </div>
+            <div class="reg-group">
+              <label class="reg-label" for="regYear">Year of Study <span>*</span></label>
+              <select class="reg-select" id="regYear">
+                <option value="">Select year</option>
+                <option>1st Year</option>
+                <option>2nd Year</option>
+                <option>3rd Year</option>
+                <option>4th Year</option>
+              </select>
+              <div class="field-error" id="err-year">Please select your year</div>
+            </div>
+          </div>
+          <div class="reg-group">
+            <label class="reg-label" for="regDept">Department <span>*</span></label>
+            <select class="reg-select" id="regDept">
+              <option value="">Select department</option>
+              <option>Computer Science & Engineering (CSE)</option>
+              <option>Artificial Intelligence & ML (AI&ML)</option>
+              <option>Electronics & Communication (ECE)</option>
+              <option>Information Technology (IT)</option>
+              <option>Mechanical Engineering (MECH)</option>
+              <option>Civil Engineering (CIVIL)</option>
+              <option>Electrical Engineering (EE)</option>
+              <option>Other</option>
+            </select>
+            <div class="field-error" id="err-dept">Please select your department</div>
+          </div>
+          <div class="reg-actions">
+            <button class="reg-btn reg-btn--primary" onclick="goToStep(2)">Continue →</button>
+          </div>
+        </div>
+
+        <!-- Panel 2: Event Details -->
+        <div class="reg-panel" id="regPanel2">
+          <div class="reg-group">
+            <label class="reg-label">Participation Type <span>*</span></label>
+            <div class="reg-toggle">
+              <input type="radio" name="partType" id="ptSolo" value="Solo" checked>
+              <label for="ptSolo">👤 Solo</label>
+              <input type="radio" name="partType" id="ptPair" value="Pair">
+              <label for="ptPair">👥 Pair</label>
+              <input type="radio" name="partType" id="ptTeam" value="Team">
+              <label for="ptTeam">🏅 Team</label>
+            </div>
+          </div>
+
+          <div id="teamMembersArea" style="display:none;">
+            <div class="reg-group">
+              <label class="reg-label">Team Name <span>*</span></label>
+              <input class="reg-input" id="regTeamName" type="text" placeholder="e.g. Code Ninjas">
+              <div class="field-error" id="err-teamName">Please enter a team name</div>
+            </div>
+            <div class="reg-group">
+              <label class="reg-label">Team Members</label>
+              <div id="membersList">
+                <div class="member-row">
+                  <input class="reg-input" type="text" placeholder="Member 2 – Name">
+                  <input class="reg-input" type="email" placeholder="Member 2 – Email">
+                </div>
+                <div class="member-row">
+                  <input class="reg-input" type="text" placeholder="Member 3 – Name">
+                  <input class="reg-input" type="email" placeholder="Member 3 – Email">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="pairMemberArea" style="display:none;">
+            <div class="reg-group">
+              <label class="reg-label">Partner Details</label>
+              <div class="member-row">
+                <input class="reg-input" id="partnerName" type="text" placeholder="Partner's Name">
+                <input class="reg-input" id="partnerEmail" type="email" placeholder="Partner's Email">
+              </div>
+            </div>
+          </div>
+
+          <div class="reg-group">
+            <label class="reg-label" for="regCollege">College / Institution <span>*</span></label>
+            <input class="reg-input" id="regCollege" type="text" placeholder="e.g. Apex College of Engineering">
+            <div class="field-error" id="err-college">Please enter your college name</div>
+          </div>
+          <div class="reg-group">
+            <label class="reg-label" for="regWhyJoin">Why do you want to participate?</label>
+            <textarea class="reg-textarea" id="regWhyJoin" placeholder="Tell us a bit about yourself and what excites you about this event..."></textarea>
+          </div>
+          <div class="reg-actions">
+            <button class="reg-btn reg-btn--outline" onclick="goToStep(1)">← Back</button>
+            <button class="reg-btn reg-btn--primary" onclick="goToStep(3)">Review →</button>
+          </div>
+        </div>
+
+        <!-- Panel 3: Confirm & Submit -->
+        <div class="reg-panel" id="regPanel3">
+          <div style="background:var(--cream);border-radius:16px;padding:22px 24px;margin-bottom:20px;border:1px solid rgba(11,31,58,.07);">
+            <div style="font-size:.72rem;font-weight:700;color:var(--teal);letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px;">Registration Summary</div>
+            <div id="summaryContent" style="display:flex;flex-direction:column;gap:10px;"></div>
+          </div>
+          <div style="background:rgba(0,201,167,.07);border:1px solid rgba(0,201,167,.2);border-radius:12px;padding:14px 18px;margin-bottom:8px;font-size:.84rem;color:var(--navy);line-height:1.6;">
+            📌 By submitting, you agree to the <strong>Apex Fest 2025 participation guidelines</strong>. A confirmation email will be sent to your registered address within 24 hours.
+          </div>
+          <div class="reg-actions">
+            <button class="reg-btn reg-btn--outline" onclick="goToStep(2)">← Back</button>
+            <button class="reg-btn reg-btn--primary" onclick="submitReg()" id="submitBtn">
+              ✅ Submit Registration
+            </button>
+          </div>
+        </div>
+
+        <!-- Success -->
+        <div class="reg-panel" id="regSuccess">
+          <div class="reg-success">
+            <div class="reg-success__icon">🎉</div>
+            <div class="reg-success__title">You're Registered!</div>
+            <div class="reg-success__sub">
+              Your spot is confirmed. A confirmation email has been sent to <strong id="successEmail"></strong>.<br>
+              Check your inbox (and spam folder) for event details.
+            </div>
+            <div class="reg-success__ref" id="successRef">REF #APX-2025-0000</div>
+            <button class="reg-btn reg-btn--primary" style="max-width:220px;margin:0 auto;" onclick="closeReg()">
+              Done 🎓
+            </button>
+          </div>
+        </div>
+
+      </div><!-- /reg-modal__body -->
+    </div><!-- /reg-modal -->
+  </div><!-- /reg-overlay -->
+
+  <script>
+    /* ── NAV ──────────────────────────────────────────────── */
+    function toggleMenu() {
+      document.getElementById('mobileMenu').classList.toggle('open');
+    }
+    function closeMenu() {
+      document.getElementById('mobileMenu').classList.remove('open');
+    }
+    document.addEventListener('click', e => {
+      const menu   = document.getElementById('mobileMenu');
+      const burger = document.querySelector('.nav__burger');
+      if (!menu.contains(e.target) && !burger.contains(e.target)) {
+        menu.classList.remove('open');
+      }
+    });
+
+    /* ── REGISTRATION MODAL ───────────────────────────────── */
+    let currentEvent = '';
+
+    // Event metadata keyed by card category
+    const eventData = {
+      'Technology':      { name: 'Code Clash Hackathon',       date: 'April 12–13, 2025', tag: '💻 Technology' },
+      'Performing Arts': { name: 'Beats & Moves – Dance Fiesta',date: 'April 14, 2025',   tag: '💃 Performing Arts' },
+      'Sports':          { name: 'Cricket Premier League',      date: 'April 15–16, 2025', tag: '🏏 Sports' },
+      'Cultural':        { name: 'Rangmanch – Street Play',     date: 'April 17, 2025',   tag: '🎭 Cultural' },
+      'Academic':        { name: 'Tech Brain Quiz',             date: 'April 13, 2025',   tag: '🧠 Academic' },
+      'Literary':        { name: 'Vox Veritas – Debate',        date: 'April 15, 2025',   tag: '📜 Literary' },
+    };
+
+    function openReg(btn) {
+      // Find nearest event card and read category
+      const card = btn.closest('.event-card');
+      const cat  = card ? card.querySelector('.event-card__cat')?.textContent.trim() : null;
+      const info = (cat && eventData[cat]) ? eventData[cat] : { name: btn.dataset.event || 'Event', date: '', tag: '📅 Event Registration' };
+
+      currentEvent = info.name;
+      document.getElementById('regEventTag').textContent  = info.tag;
+      document.getElementById('regModalTitle').textContent = info.name;
+
+      // Reset form
+      resetReg();
+
+      document.getElementById('regOverlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+      // Focus first input for accessibility
+      setTimeout(() => document.getElementById('regFirstName').focus(), 200);
+    }
+
+    function closeReg() {
+      document.getElementById('regOverlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    // Close on overlay backdrop click
+    document.getElementById('regOverlay').addEventListener('click', function(e) {
+      if (e.target === this) closeReg();
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeReg();
+    });
+
+    // Participation type toggle
+    document.querySelectorAll('input[name="partType"]').forEach(radio => {
+      radio.addEventListener('change', function() {
+        const teamArea = document.getElementById('teamMembersArea');
+        const pairArea = document.getElementById('pairMemberArea');
+        teamArea.style.display = this.value === 'Team' ? 'block' : 'none';
+        pairArea.style.display = this.value === 'Pair' ? 'block' : 'none';
+      });
+    });
+
+    /* Validation helpers */
+    function showErr(id, show) {
+      const el = document.getElementById(id);
+      if (el) { show ? el.classList.add('show') : el.classList.remove('show'); }
+    }
+    function setErr(inputId, errId, hasErr) {
+      const inp = document.getElementById(inputId);
+      if (inp) { hasErr ? inp.classList.add('error') : inp.classList.remove('error'); }
+      showErr(errId, hasErr);
+      return hasErr;
+    }
+
+    function validateStep1() {
+      const fn  = document.getElementById('regFirstName').value.trim();
+      const ln  = document.getElementById('regLastName').value.trim();
+      const em  = document.getElementById('regEmail').value.trim();
+      const ph  = document.getElementById('regPhone').value.trim();
+      const yr  = document.getElementById('regYear').value;
+      const dp  = document.getElementById('regDept').value;
+      let ok = true;
+      if (setErr('regFirstName','err-firstName',!fn)) ok=false;
+      if (setErr('regLastName','err-lastName',!ln)) ok=false;
+      if (setErr('regEmail','err-email',!/\S+@\S+\.\S+/.test(em))) ok=false;
+      if (setErr('regPhone','err-phone',ph.length < 7)) ok=false;
+      if (setErr('regYear','err-year',!yr)) ok=false;
+      if (setErr('regDept','err-dept',!dp)) ok=false;
+      return ok;
+    }
+
+    function validateStep2() {
+      const col = document.getElementById('regCollege').value.trim();
+      let ok = true;
+      if (setErr('regCollege','err-college',!col)) ok=false;
+      const partType = document.querySelector('input[name="partType"]:checked').value;
+      if (partType === 'Team') {
+        const tn = document.getElementById('regTeamName').value.trim();
+        if (setErr('regTeamName','err-teamName',!tn)) ok=false;
+      }
+      return ok;
+    }
+
+    function buildSummary() {
+      const partType = document.querySelector('input[name="partType"]:checked').value;
+      const rows = [
+        { label: 'Event',       value: currentEvent },
+        { label: 'Name',        value: document.getElementById('regFirstName').value.trim() + ' ' + document.getElementById('regLastName').value.trim() },
+        { label: 'Email',       value: document.getElementById('regEmail').value.trim() },
+        { label: 'Phone',       value: document.getElementById('regPhone').value.trim() },
+        { label: 'Year',        value: document.getElementById('regYear').value },
+        { label: 'Department',  value: document.getElementById('regDept').value },
+        { label: 'Institution', value: document.getElementById('regCollege').value.trim() },
+        { label: 'Participation', value: partType },
+      ];
+      if (partType === 'Team') {
+        rows.push({ label: 'Team Name', value: document.getElementById('regTeamName').value.trim() });
+      }
+      document.getElementById('summaryContent').innerHTML = rows.map(r =>
+        `<div style="display:flex;justify-content:space-between;gap:16px;font-size:.86rem;padding-bottom:8px;border-bottom:1px solid rgba(11,31,58,.06);">
+          <span style="color:var(--muted);font-weight:600;text-transform:uppercase;font-size:.72rem;letter-spacing:.06em;">${r.label}</span>
+          <span style="color:var(--navy);font-weight:500;text-align:right;">${r.value || '—'}</span>
+        </div>`
+      ).join('');
+    }
+
+    function goToStep(step) {
+      if (step === 2 && !validateStep1()) return;
+      if (step === 3 && !validateStep2()) return;
+
+      // Show correct panel
+      ['regPanel1','regPanel2','regPanel3','regSuccess'].forEach(id => {
+        document.getElementById(id).classList.remove('visible');
+      });
+      const panelMap = {1:'regPanel1', 2:'regPanel2', 3:'regPanel3'};
+      if (panelMap[step]) document.getElementById(panelMap[step]).classList.add('visible');
+
+      // Update step indicators
+      [1,2,3].forEach(i => {
+        const ind = document.getElementById(`step-ind-${i}`);
+        ind.classList.remove('active','done');
+        if (i < step) ind.classList.add('done');
+        if (i === step) ind.classList.add('active');
+        // tick mark for done
+        ind.querySelector('.reg-step__dot').textContent = i < step ? '✓' : i;
+      });
+
+      if (step === 3) buildSummary();
+
+      // Show/hide steps bar on success
+      document.getElementById('regSteps').style.display = step <= 3 ? '' : 'none';
+
+      // Scroll modal to top
+      document.getElementById('regModal').scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function submitReg() {
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = '⏳ Submitting…';
+
+      // Simulate submission delay
+      setTimeout(() => {
+        // Show success
+        ['regPanel1','regPanel2','regPanel3'].forEach(id => {
+          document.getElementById(id).classList.remove('visible');
+        });
+        document.getElementById('regSuccess').classList.add('visible');
+        document.getElementById('regSteps').style.display = 'none';
+
+        // Fill success info
+        const email = document.getElementById('regEmail').value.trim();
+        document.getElementById('successEmail').textContent = email;
+        const ref = 'APX-2025-' + Math.floor(1000 + Math.random() * 9000);
+        document.getElementById('successRef').textContent = 'REF #' + ref;
+
+        btn.disabled = false;
+        btn.textContent = '✅ Submit Registration';
+      }, 1200);
+    }
+
+    function resetReg() {
+      // Reset all inputs
+      ['regFirstName','regLastName','regEmail','regPhone','regCollege','regTeamName','regWhyJoin']
+        .forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+      ['regYear','regDept'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+
+      // Remove error states
+      document.querySelectorAll('.reg-input.error, .reg-select.error').forEach(el => el.classList.remove('error'));
+      document.querySelectorAll('.field-error.show').forEach(el => el.classList.remove('show'));
+
+      // Reset participation type
+      document.getElementById('ptSolo').checked = true;
+      document.getElementById('teamMembersArea').style.display = 'none';
+      document.getElementById('pairMemberArea').style.display = 'none';
+
+      // Go to step 1
+      ['regPanel1','regPanel2','regPanel3','regSuccess'].forEach(id => {
+        document.getElementById(id).classList.remove('visible');
+      });
+      document.getElementById('regPanel1').classList.add('visible');
+      document.getElementById('regSteps').style.display = '';
+
+      [1,2,3].forEach(i => {
+        const ind = document.getElementById(`step-ind-${i}`);
+        ind.classList.remove('active','done');
+        ind.querySelector('.reg-step__dot').textContent = i;
+        if (i === 1) ind.classList.add('active');
+      });
+    }
+
+    // Attach openReg to ALL Register buttons
+    document.querySelectorAll('.event-card__btn').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        openReg(this);
+      });
+    });
+
+    // Also attach to "Register Now" nav links
+    document.querySelectorAll('.nav__cta, a[href="#events"]').forEach(link => {
+      if (link.textContent.trim().startsWith('Register')) {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          // Open generic modal
+          currentEvent = 'Apex Fest 2025';
+          document.getElementById('regEventTag').textContent  = '🎓 Annual Fest 2025';
+          document.getElementById('regModalTitle').textContent = 'Register for Apex Fest 2025';
+          resetReg();
+          document.getElementById('regOverlay').classList.add('open');
+          document.body.style.overflow = 'hidden';
+          setTimeout(() => document.getElementById('regFirstName').focus(), 200);
+        });
+      }
+    });
+  </script>
+</body>
+</html>
